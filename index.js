@@ -19,11 +19,22 @@ mongoose.connect(uri, {
     useNewUrlParser: true,
 })
 
+http.listen(port, () => {
+    console.log('listening on port: ' + port)
+})
+
 io.on('connection', (socket) => {
-    Pin.find().sort({createdAt: -1}.limit(30)).exec((err, pins) => {
+    console.log("User has connected.")
+    Pin.find().sort({createdAt: -1}).limit(30).exec((err, pins) => {
         if (err) return console.log(err)
 
         socket.emit('init', pins)
+    })
+
+    socket.on("iosConnect", function(data) {
+        console.log("iOS Data: ", data)
+
+        socket.emit('iOS Client Port', {msg: 'ioS CLIENT'})
     })
 
     socket.on('pin', (pn) => {
@@ -41,6 +52,3 @@ io.on('connection', (socket) => {
     })
 })
 
-http.listen(port, () => {
-    console.log('listening on port: ' + port)
-})
